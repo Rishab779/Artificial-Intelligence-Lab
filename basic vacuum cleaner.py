@@ -1,60 +1,56 @@
-location = 'A'
-A = 'Clean'
-B = 'Clean'
-
-print("Status:")
-print("Location A:", A)
-print("Location B:", B)
-
-def left():
-    global location
-    location = 'A'
-    print("Action: LEFT")
-
-def right():
-    global location
-    location = 'B'
-    print("Action: RIGHT")
-
-def suck():
-    global A, B
-    print("Action: SUCK")
-    if location == 'A':
-        A = 'Clean'
+def vacuum_agent(percept):
+    location, status = percept
+    
+    if status == "Dirty":
+        return "SUCK"
+    elif location == "A":
+        return "RIGHT"
     else:
-        B = 'Clean'
+        return "LEFT"
 
-def noOp():
-    print("Action: NOOP")
 
-def performance():
-    cleaned = 0
-    if A == 'Clean':
-        cleaned += 1
-    if B == 'Clean':
-        cleaned += 1
+# Initial Environment
+rooms = {
+    "A": "Dirty",
+    "B": "Dirty"
+}
 
-    cleaned_percent = (cleaned / 2) * 100
-    dirty_percent = 100 - cleaned_percent
+total_rooms = len(rooms)
+cleaned_rooms = 0
+current_location = "A"
+percept_sequence = []
 
-    print("\nPerformance:")
-    print("Cleaned =", cleaned_percent, "%")
-    print("Dirty =", dirty_percent, "%")
+print("\nSTEP | LOCATION | ACTION | STATUS | PERFORMANCE | PERCENTAGE | PERCEPT")
 
-if location == 'A':
-    if A == 'Dirty':
-        suck()
-    else:
-        right()
+for step in range(1, 7):
 
-if location == 'B':
-    if B == 'Dirty':
-        suck()
-    else:
-        noOp()
+    # Get current status
+    status = rooms[current_location]
+    
+    # Create percept
+    percept = (current_location, status)
+    percept_sequence.append(percept)
+    
+    # Decide action
+    action = vacuum_agent(percept)
 
-print("\nFinal Status:")
-print("Location A:", A)
-print("Location B:", B)
+    # Perform action
+    if action == "SUCK":
+        if rooms[current_location] == "Dirty":
+            rooms[current_location] = "Clean"
+            cleaned_rooms += 1
 
-performance()
+    elif action == "RIGHT":
+        current_location = "B"
+
+    elif action == "LEFT":
+        current_location = "A"
+
+    # Performance calculation
+    performance = cleaned_rooms
+    percentage = (cleaned_rooms / total_rooms) * 100
+
+    # Print output
+    print(f"{step:^4} | {current_location:^8} | {action:^6} | "
+          f"{rooms[current_location]:^6} | {performance:^11} | "
+          f"{percentage:^10.0f}% | {percept}")
